@@ -2,6 +2,7 @@
 -- Database Schema
 
 -- Drop existing tables if they exist (for fresh installation)
+DROP TABLE IF EXISTS `car_expenses`;
 DROP TABLE IF EXISTS `documents`;
 DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `container_cars`;

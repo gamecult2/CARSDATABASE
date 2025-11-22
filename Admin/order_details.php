@@ -53,10 +53,31 @@ $shipping = getShippingStatus($id);
 
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    if (!validate_csrf_token($_POST['csrf_token'])) {
+        setAlert('danger', 'Invalid CSRF token.');
+        header("Location: order_details.php?id=$id");
+        exit;
+    }
+
     $new_status = sanitize($_POST['shipping_status'] ?? '');
-    $stmt = $pdo->prepare("UPDATE orders SET shipping_status = ? WHERE id = ?");
-    if ($stmt->execute([$new_status, $id])) {
-        setAlert('success', 'Shipping status updated');
+    if ($new_status !== $order['shipping_status']) {
+        $stmt = $pdo->prepare("UPDATE orders SET shipping_status = ? WHERE id = ?");
+        if ($stmt->execute([$new_status, $id])) {
+            // Send email notification
+            $client_email = $order['email'];
+            $subject = "Your Order Status has been Updated";
+            $body = "Dear " . $order['client_name'] . ",\n\n";
+            $body .= "The status of your order #" . $order['order_id'] . " has been updated to: " . $new_status . "\n\n";
+            $body .= "You can view your order details here: " . BASE_URL . "/order_view.php?order_id=" . $id . "\n\n";
+            $body .= "Thank you for your business.\n";
+            send_email_notification($client_email, $subject, $body);
+
+            setAlert('success', 'Shipping status updated and client notified.');
+            header('Location: order_details.php?id=' . $id);
+            exit;
+        }
+    } else {
+        setAlert('info', 'No change in shipping status.');
         header('Location: order_details.php?id=' . $id);
         exit;
     }
@@ -153,6 +174,7 @@ $video_count = countOrderMedia($id, 'video');
                                         <th>Shipping Status:</th>
                                         <td>
                                             <form method="POST" class="d-inline">
+                                                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                 <select name="shipping_status" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="this.form.submit()">
                                                     <option value="Awaiting Container" <?php echo $order['shipping_status'] === 'Awaiting Container' ? 'selected' : ''; ?>>Awaiting Container</option>
                                                     <option value="Shipped on Container" <?php echo $order['shipping_status'] === 'Shipped on Container' ? 'selected' : ''; ?>>Shipped on Container</option>

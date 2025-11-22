@@ -306,3 +306,16 @@ INSERT INTO `payments` (`payment_id`, `order_id`, `payment_date`, `amount_paid`,
 ('PAY002', 1, '2024-01-25', 10000.00, 'Bank Transfer', 'Installment', 'TRF002'),
 ('PAY003', 2, '2024-01-12', 8000.00, 'Cash', 'Deposit', 'CASH001'),
 ('PAY004', 3, '2024-01-05', 40000.00, 'Bank Transfer', 'Full Payment', 'TRF003');
+
+-- Car Expenses table
+CREATE TABLE `car_expenses` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `car_id` INT(11) NOT NULL,
+  `expense_type` VARCHAR(100) NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `expense_date` DATE NOT NULL,
+  `description` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -40,6 +40,52 @@ $orders = $stmt->fetchAll();
 
 // Get documents
 $documents = getDocuments('car', $id);
+
+// Get car expenses
+$stmt = $pdo->prepare("SELECT * FROM car_expenses WHERE car_id = ? ORDER BY expense_date DESC");
+$stmt->execute([$id]);
+$expenses = $stmt->fetchAll();
+
+// Handle add expense
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_expense'])) {
+    if (!validate_csrf_token($_POST['csrf_token'])) {
+        setAlert('danger', 'Invalid CSRF token.');
+        header("Location: car_details.php?id=$id");
+        exit;
+    }
+
+    $expense_type = trim($_POST['expense_type']);
+    $amount = filter_var($_POST['amount'], FILTER_VALIDATE_FLOAT);
+    $expense_date = $_POST['expense_date'];
+    $description = trim($_POST['description']);
+    $date_time = DateTime::createFromFormat('Y-m-d', $expense_date);
+
+    if (empty($expense_type) || $amount === false || $amount <= 0 || !$date_time || $date_time->format('Y-m-d') !== $expense_date) {
+        setAlert('danger', 'Invalid input. Please check the form and try again.');
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO car_expenses (car_id, expense_type, amount, expense_date, description) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$id, $expense_type, $amount, $expense_date, $description]);
+        setAlert('success', 'Expense added successfully');
+    }
+    header("Location: car_details.php?id=$id");
+    exit;
+}
+
+// Handle delete expense
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_expense'])) {
+    if (!validate_csrf_token($_POST['csrf_token'])) {
+        setAlert('danger', 'Invalid CSRF token.');
+        header("Location: car_details.php?id=$id");
+        exit;
+    }
+    $expense_id = $_POST['expense_id'];
+    $stmt = $pdo->prepare("DELETE FROM car_expenses WHERE id = ? AND car_id = ?");
+    $stmt->execute([$expense_id, $id]);
+
+    setAlert('success', 'Expense deleted successfully');
+    header("Location: car_details.php?id=$id");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,11 +99,11 @@ $documents = getDocuments('car', $id);
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
-    
+
     <div class="container-fluid">
         <div class="row">
             <?php include 'includes/sidebar.php'; ?>
-            
+
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><i class="bi bi-car-front"></i> Car Details</h1>
@@ -70,9 +116,9 @@ $documents = getDocuments('car', $id);
                         </a>
                     </div>
                 </div>
-                
+
                 <?php displayAlert(); ?>
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="card">
@@ -127,7 +173,7 @@ $documents = getDocuments('car', $id);
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Documents -->
                     <div class="col-md-6">
                         <div class="card">
@@ -158,7 +204,57 @@ $documents = getDocuments('car', $id);
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- Expenses -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <h5>Car Expenses</h5>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#expenseModal">
+                                    <i class="bi bi-plus-circle"></i> Add Expense
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <?php if (empty($expenses)): ?>
+                                    <p class="text-muted">No expenses recorded for this car.</p>
+                                <?php else: ?>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                                <th>Description</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($expenses as $expense): ?>
+                                            <tr>
+                                                <td><?php echo formatDate($expense['expense_date']); ?></td>
+                                                <td><?php echo htmlspecialchars($expense['expense_type']); ?></td>
+                                                <td><?php echo formatCurrency($expense['amount']); ?></td>
+                                                <td><?php echo htmlspecialchars($expense['description']); ?></td>
+                                                <td>
+                                                    <form method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?');">
+                                                        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                                                        <input type="hidden" name="expense_id" value="<?php echo $expense['id']; ?>">
+                                                        <button type="submit" name="delete_expense" class="btn btn-sm btn-danger">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Orders -->
                 <?php if (!empty($orders)): ?>
                 <div class="card">
@@ -202,7 +298,7 @@ $documents = getDocuments('car', $id);
             </main>
         </div>
     </div>
-    
+
     <!-- Upload Modal -->
     <div class="modal fade" id="uploadModal" tabindex="-1">
         <div class="modal-dialog">
@@ -229,8 +325,44 @@ $documents = getDocuments('car', $id);
             </div>
         </div>
     </div>
-    
+
+    <!-- Add Expense Modal -->
+    <div class="modal fade" id="expenseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Expense</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="expense_type" class="form-label">Expense Type</label>
+                            <input type="text" class="form-control" id="expense_type" name="expense_type" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense_date" class="form-label">Expense Date</label>
+                            <input type="date" class="form-control" id="expense_date" name="expense_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="add_expense" class="btn btn-primary">Add Expense</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

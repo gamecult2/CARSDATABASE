@@ -7,6 +7,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'sales_report.php' ? 'active' : ''; ?>" href="sales_report.php">
+                    <i class="bi bi-bar-chart-line"></i> Sales Report
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link <?php echo in_array(basename($_SERVER['PHP_SELF']), ['clients.php', 'add_client.php', 'edit_client.php', 'client_details.php', 'orders.php', 'add_order.php', 'add_client_and_order.php', 'order_details.php', 'clients_and_orders.php']) ? 'active' : ''; ?>" href="clients_and_orders.php">
                     <i class="bi bi-people-fill"></i> Clients & Orders
                 </a>

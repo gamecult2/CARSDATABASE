@@ -1,0 +1,95 @@
+/**
+ * Admin Dashboard Styles
+ */
+
+body {
+    font-size: 0.875rem;
+    padding-top: 56px;
+}
+
+.sidebar {
+    position: fixed;
+    top: 56px;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+    padding: 0.75rem 1rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.5rem;
+}
+
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+main {
+    margin-top: 20px;
+}
+
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.badge {
+    font-size: 0.75rem;
+    color: #fff !important;
+    font-weight: 600;
+    display: inline-block;
+    padding: 0.35em 0.65em;
+}
+
+.badge.shipping-awaiting, 
+.badge.shipping-awaiting-container { background-color: #ffc107 !important; }
+
+.badge.shipping-shipped,
+.badge.shipping-shipped-on-container { background-color: #17a2b8 !important; }
+
+.badge.shipping-arrived,
+.badge.shipping-arrived-in-algeria { background-color: #28a745 !important; }
+
+.badge.shipping-customs,
+.badge.shipping-customs-cleared { background-color: #6c757d !important; }
+
+.badge.shipping-ready,
+.badge.shipping-ready-for-pickup { background-color: #007bff !important; }
+
+.badge.shipping-delivered { background-color: #28a745 !important; }
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: relative;
+        top: 0;
+        padding: 0;
+    }
+    
+    main {
+        margin-top: 0;
+    }
+}
+

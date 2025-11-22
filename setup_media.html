@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media System Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .setup-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        .setup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .setup-header h1 {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .setup-header p {
+            color: #666;
+            margin: 0;
+        }
+        .setup-steps {
+            display: none;
+        }
+        .setup-steps.active {
+            display: block;
+        }
+        .step-content {
+            margin-bottom: 30px;
+        }
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .step-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            display: block;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button-group button {
+            flex: 1;
+        }
+        .spinner-border {
+            display: none;
+        }
+        .spinner-border.active {
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1><i class="bi bi-images"></i> Media System Setup</h1>
+            <p>Initialize the database tables for media management</p>
+        </div>
+
+        <!-- Step 1: Welcome -->
+        <div id="step1" class="setup-steps active">
+            <div class="step-content">
+                <div class="step-title">Welcome to Media System Setup</div>
+                <div class="step-description">
+                    <p>This setup wizard will create the necessary database tables for the media management system.</p>
+                    <p><strong>What will be created:</strong></p>
+                    <ul>
+                        <li><code>order_media</code> table - Stores media metadata</li>
+                        <li><code>media_logs</code> table - Audit trail for access logging</li>
+                        <li>3 indexes for performance optimization</li>
+                    </ul>
+                    <p><strong>Requirements:</strong></p>
+                    <ul>
+                        <li>MySQL/MariaDB database connection</li>
+                        <li>Existing <code>orders</code> and <code>users</code> tables</li>
+                        <li>Write permissions on database</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToStep(2)">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Create Tables -->
+        <div id="step2" class="setup-steps">
+            <div class="step-content">
+                <div class="step-title">Create Database Tables</div>
+                <div class="step-description">
+                    <p>Click the button below to create the required database tables:</p>
+                </div>
+                <div id="status" class="status"></div>
+                <button class="btn btn-primary btn-lg w-100" onclick="createTables()" id="createBtn">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Create Tables
+                </button>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+                <button class="btn btn-primary" onclick="goToStep(3)" id="nextBtn" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Verification -->
+        <div id="step3" class="setup-steps">
+            <div class="step-content">
+                <div class="step-title">Setup Complete!</div>
+                <div class="step-description">
+                    <p><i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i></p>
+                    <p>The media system tables have been successfully created.</p>
+                    <p><strong>Next steps:</strong></p>
+                    <ol>
+                        <li>Create media upload directory: <code>/uploads/media/orders/thumbs/</code></li>
+                        <li>Set directory permissions to 755</li>
+                        <li>Test upload: Go to Admin → Orders → Order Details → Media Gallery</li>
+                        <li>Upload a test photo or video</li>
+                        <li>View media in Client Portal</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="button-group">
+                <a href="Admin/index.php" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-arrow-right"></i> Go to Admin Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.setup-steps').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Show selected step
+            document.getElementById('step' + step).classList.add('active');
+        }
+
+        function createTables() {
+            const btn = document.getElementById('createBtn');
+            const statusEl = document.getElementById('status');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            btn.disabled = true;
+            document.querySelector('.spinner-border').classList.add('active');
+            statusEl.className = 'status info';
+            statusEl.innerHTML = '<i class="bi bi-hourglass"></i> Creating tables...';
+
+            fetch('create_media_tables_ajax.php', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusEl.className = 'status success';
+                    statusEl.innerHTML = '<i class="bi bi-check-circle"></i> ' + data.message;
+                    nextBtn.disabled = false;
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.innerHTML = '<i class="bi bi-x-circle"></i> ' + data.message;
+                    btn.disabled = false;
+                }
+                document.querySelector('.spinner-border').classList.remove('active');
+            })
+            .catch(error => {
+                statusEl.className = 'status error';
+                statusEl.innerHTML = '<i class="bi bi-x-circle"></i> Error: ' + error.message;
+                btn.disabled = false;
+                document.querySelector('.spinner-border').classList.remove('active');
+            });
+        }
+    </script>
+</body>
+</html>

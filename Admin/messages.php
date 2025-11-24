@@ -105,7 +105,7 @@ $unread_count = getUnreadAdminMessageCount();
     <title>Messages - <?php echo APP_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="custom_style.css" rel="stylesheet">
 </head>
 <body>
     <?php require_once 'includes/sidebar.php'; ?>

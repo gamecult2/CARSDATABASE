@@ -54,6 +54,21 @@ function generateRandomAddress() {
 
 // Process data
 try {
+    // Create car_expenses table if it doesn't exist
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `car_expenses` (
+          `id` INT(11) NOT NULL AUTO_INCREMENT,
+          `car_id` INT(11) NOT NULL,
+          `expense_type` VARCHAR(100) NOT NULL,
+          `amount` DECIMAL(10,2) NOT NULL,
+          `expense_date` DATE NOT NULL,
+          `description` TEXT,
+          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (`id`),
+          FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+
     $pdo->beginTransaction();
     
     // Create containers for each group of 4 cars
